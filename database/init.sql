@@ -1,0 +1,4 @@
+-- 初始化数据库脚本
+CREATE DATABASE zapdb;
+CREATE USER zapuser WITH PASSWORD 'zappass';
+GRANT ALL PRIVILEGES ON DATABASE zapdb TO zapuser;
