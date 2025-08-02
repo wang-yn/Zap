@@ -1,6 +1,5 @@
-import { Project as PrismaProject, Page as PrismaPage } from '@prisma/client';
-import { Project } from '../../../domain/entities/project.entity';
-import { PageMapper } from './page.mapper';
+import { Project as PrismaProject, Page as PrismaPage } from '@prisma/client'
+import { Project } from '../../../domain/entities/project.entity'
 
 /**
  * 项目实体与Prisma模型之间的映射器
@@ -18,28 +17,26 @@ export class ProjectMapper {
       status: prismaProject.status,
       config: prismaProject.config,
       createdAt: prismaProject.createdAt,
-      updatedAt: prismaProject.updatedAt
-    });
+      updatedAt: prismaProject.updatedAt,
+    })
   }
 
   /**
    * 从Prisma模型转换为领域实体（包含页面）
    */
-  static toDomainWithPages(
-    prismaProject: PrismaProject & { pages?: PrismaPage[] }
-  ): Project {
-    const project = this.toDomain(prismaProject);
-    
+  static toDomainWithPages(prismaProject: PrismaProject & { pages?: PrismaPage[] }): Project {
+    const project = this.toDomain(prismaProject)
+
     // 注意：这里只是设置基本信息，页面需要通过领域方法添加
     // 因为领域实体不应该直接设置内部状态
-    return project;
+    return project
   }
 
   /**
    * 从领域实体转换为Prisma模型数据
    */
   static toPersistence(project: Project) {
-    const persistence = project.toPersistence();
+    const persistence = project.toPersistence()
     return {
       id: persistence.id,
       name: persistence.name,
@@ -48,14 +45,14 @@ export class ProjectMapper {
       status: persistence.status,
       config: persistence.config,
       createdAt: persistence.createdAt,
-      updatedAt: persistence.updatedAt
-    };
+      updatedAt: persistence.updatedAt,
+    }
   }
 
   /**
    * 批量转换Prisma模型为领域实体
    */
   static toDomainList(prismaProjects: PrismaProject[]): Project[] {
-    return prismaProjects.map(project => this.toDomain(project));
+    return prismaProjects.map(project => this.toDomain(project))
   }
 }

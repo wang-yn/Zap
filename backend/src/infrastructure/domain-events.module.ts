@@ -1,11 +1,12 @@
-import { Module } from '@nestjs/common';
-import { InMemoryDomainEventDispatcher } from './events/domain-event-dispatcher';
-import { 
+import { Module, Inject } from '@nestjs/common'
+import { InMemoryDomainEventDispatcher } from './events/domain-event-dispatcher'
+import {
   ProjectCreatedEventHandler,
   ProjectPublishedEventHandler,
-  ProjectNameChangedEventHandler
-} from './events/event-handlers/project-event.handlers';
-import { DOMAIN_EVENT_DISPATCHER } from '../common/constants/injection-tokens';
+  ProjectNameChangedEventHandler,
+} from './events/event-handlers/project-event.handlers'
+import { DOMAIN_EVENT_DISPATCHER } from '../common/constants/injection-tokens'
+import { DomainEventDispatcher } from '../domain/events/domain-event'
 
 /**
  * 领域事件模块
@@ -16,9 +17,9 @@ import { DOMAIN_EVENT_DISPATCHER } from '../common/constants/injection-tokens';
     // 事件分发器
     {
       provide: DOMAIN_EVENT_DISPATCHER,
-      useClass: InMemoryDomainEventDispatcher
+      useClass: InMemoryDomainEventDispatcher,
     },
-    
+
     // 事件处理器
     ProjectCreatedEventHandler,
     ProjectPublishedEventHandler,
@@ -29,16 +30,16 @@ import { DOMAIN_EVENT_DISPATCHER } from '../common/constants/injection-tokens';
     ProjectCreatedEventHandler,
     ProjectPublishedEventHandler,
     ProjectNameChangedEventHandler,
-  ]
+  ],
 })
 export class DomainEventsModule {
   constructor(
-    private readonly eventDispatcher: InMemoryDomainEventDispatcher,
+    @Inject(DOMAIN_EVENT_DISPATCHER) private readonly eventDispatcher: DomainEventDispatcher,
     private readonly projectCreatedHandler: ProjectCreatedEventHandler,
     private readonly projectPublishedHandler: ProjectPublishedEventHandler,
-    private readonly projectNameChangedHandler: ProjectNameChangedEventHandler,
+    private readonly projectNameChangedHandler: ProjectNameChangedEventHandler
   ) {
-    this.registerEventHandlers();
+    this.registerEventHandlers()
   }
 
   /**
@@ -46,10 +47,10 @@ export class DomainEventsModule {
    */
   private registerEventHandlers(): void {
     // 注册项目相关事件处理器
-    this.eventDispatcher.register('ProjectCreated', this.projectCreatedHandler);
-    this.eventDispatcher.register('ProjectPublished', this.projectPublishedHandler);
-    this.eventDispatcher.register('ProjectNameChanged', this.projectNameChangedHandler);
-    
-    console.log('Domain event handlers registered successfully');
+    this.eventDispatcher.register('ProjectCreated', this.projectCreatedHandler)
+    this.eventDispatcher.register('ProjectPublished', this.projectPublishedHandler)
+    this.eventDispatcher.register('ProjectNameChanged', this.projectNameChangedHandler)
+
+    console.log('Domain event handlers registered successfully')
   }
 }

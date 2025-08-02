@@ -12,7 +12,7 @@ import { DomainEventsModule } from './infrastructure/domain-events.module'
     // 基础设施模块
     InfrastructureModule,
     DomainEventsModule,
-    
+
     // 业务模块
     AuthModule,
     ProjectsModule,

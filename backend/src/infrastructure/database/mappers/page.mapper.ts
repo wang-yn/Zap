@@ -1,5 +1,5 @@
-import { Page as PrismaPage } from '@prisma/client';
-import { Page } from '../../../domain/entities/page.entity';
+import { Page as PrismaPage } from '@prisma/client'
+import { Page } from '../../../domain/entities/page.entity'
 
 /**
  * 页面实体与Prisma模型之间的映射器
@@ -19,29 +19,29 @@ export class PageMapper {
       layout: prismaPage.layout as any, // Prisma的Json类型
       isPublished: prismaPage.isPublished,
       createdAt: prismaPage.createdAt,
-      updatedAt: prismaPage.updatedAt
-    });
+      updatedAt: prismaPage.updatedAt,
+    })
   }
 
   /**
    * 从领域实体转换为Prisma模型数据
    */
   static toPersistence(page: Page) {
-    return page.toPersistence();
+    return page.toPersistence()
   }
 
   /**
    * 批量转换Prisma模型为领域实体
    */
   static toDomainList(prismaPages: PrismaPage[]): Page[] {
-    return prismaPages.map(page => this.toDomain(page));
+    return prismaPages.map(page => this.toDomain(page))
   }
 
   /**
    * 创建Prisma更新数据（只包含可更新的字段）
    */
   static toUpdateData(page: Page) {
-    const persistence = page.toPersistence();
+    const persistence = page.toPersistence()
     return {
       name: persistence.name,
       path: persistence.path,
@@ -49,8 +49,8 @@ export class PageMapper {
       components: persistence.components,
       layout: persistence.layout,
       isPublished: persistence.isPublished,
-      updatedAt: persistence.updatedAt
-    };
+      updatedAt: persistence.updatedAt,
+    }
   }
 
   /**
@@ -66,8 +66,8 @@ export class PageMapper {
       isPublished: page.isPublished,
       componentCount: page.components.length,
       createdAt: page.createdAt,
-      updatedAt: page.updatedAt
-    };
+      updatedAt: page.updatedAt,
+    }
   }
 
   /**
@@ -77,10 +77,10 @@ export class PageMapper {
     return {
       meta: {
         title: page.title || page.name,
-        path: page.path
+        path: page.path,
       },
       layout: page.layout.toJSON(),
-      components: page.components.map(component => component.getRenderConfig())
-    };
+      components: page.components.map(component => component.getRenderConfig()),
+    }
   }
 }

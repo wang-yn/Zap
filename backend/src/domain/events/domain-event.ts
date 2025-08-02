@@ -1,22 +1,22 @@
-import { generateId } from '../../common/utils/id-generator';
+import { generateId } from '../../common/utils/id-generator'
 
 /**
  * 基础领域事件抽象类
  */
 export abstract class DomainEvent {
-  public readonly eventId: string;
-  public readonly occurredAt: Date;
+  public readonly eventId: string
+  public readonly occurredAt: Date
 
   constructor(
     public readonly aggregateId: string,
     public readonly eventType: string
   ) {
-    this.eventId = generateId();
-    this.occurredAt = new Date();
+    this.eventId = generateId()
+    this.occurredAt = new Date()
   }
 
   // 序列化事件数据
-  abstract getEventData(): Record<string, any>;
+  abstract getEventData(): Record<string, any>
 
   // 事件的完整数据
   toJSON() {
@@ -25,8 +25,8 @@ export abstract class DomainEvent {
       eventType: this.eventType,
       aggregateId: this.aggregateId,
       occurredAt: this.occurredAt.toISOString(),
-      data: this.getEventData()
-    };
+      data: this.getEventData(),
+    }
   }
 }
 
@@ -34,7 +34,7 @@ export abstract class DomainEvent {
  * 领域事件处理器接口
  */
 export interface DomainEventHandler<T extends DomainEvent = DomainEvent> {
-  handle(event: T): Promise<void>;
+  handle(event: T): Promise<void>
 }
 
 /**
@@ -44,29 +44,26 @@ export interface DomainEventDispatcher {
   /**
    * 注册事件处理器
    */
-  register<T extends DomainEvent>(
-    eventType: string, 
-    handler: DomainEventHandler<T>
-  ): void;
+  register<T extends DomainEvent>(eventType: string, handler: DomainEventHandler<T>): void
 
   /**
    * 分发单个事件
    */
-  dispatch(event: DomainEvent): Promise<void>;
+  dispatch(event: DomainEvent): Promise<void>
 
   /**
    * 批量分发事件
    */
-  dispatchEvents(events: readonly DomainEvent[]): Promise<void>;
+  dispatchEvents(events: readonly DomainEvent[]): Promise<void>
 }
 
 /**
  * 事件处理结果
  */
 export interface EventHandlingResult {
-  success: boolean;
-  error?: Error;
-  processingTime: number;
+  success: boolean
+  error?: Error
+  processingTime: number
 }
 
 /**
@@ -76,15 +73,15 @@ export interface EventStore {
   /**
    * 保存事件
    */
-  save(event: DomainEvent): Promise<void>;
+  save(event: DomainEvent): Promise<void>
 
   /**
    * 获取聚合的所有事件
    */
-  getEvents(aggregateId: string): Promise<DomainEvent[]>;
+  getEvents(aggregateId: string): Promise<DomainEvent[]>
 
   /**
    * 获取指定类型的事件
    */
-  getEventsByType(eventType: string): Promise<DomainEvent[]>;
+  getEventsByType(eventType: string): Promise<DomainEvent[]>
 }

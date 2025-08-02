@@ -23,7 +23,8 @@
       "Bash(docker exec:*)",
       "Bash(winpty docker exec -it zap-postgres psql -U zapuser -d zapdb -c \"\\dt\")",
       "Bash(npm run start:dev:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(timeout 10 npm run start:dev)"
     ],
     "deny": []
   }

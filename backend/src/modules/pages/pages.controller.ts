@@ -10,29 +10,27 @@ import {
   UseGuards,
   Request,
   HttpStatus,
-  HttpException
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PageApplicationService } from '../../application/services/page-application.service';
-import { 
-  CreatePageDto, 
-  UpdatePageDto, 
-  AddComponentDto, 
-  UpdateComponentDto, 
+  HttpException,
+} from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { PageApplicationService } from '../../application/services/page-application.service'
+import {
+  CreatePageDto,
+  UpdatePageDto,
+  AddComponentDto,
+  UpdateComponentDto,
   ReorderComponentsDto,
-  GetProjectPagesDto 
-} from './dto/page.dto';
-import { PageMapper } from '../../infrastructure/database/mappers/page.mapper';
+  GetProjectPagesDto,
+} from './dto/page.dto'
+import { PageMapper } from '../../infrastructure/database/mappers/page.mapper'
 
 @ApiTags('Pages')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('projects/:projectId/pages')
 export class PagesController {
-  constructor(
-    private readonly pageApplicationService: PageApplicationService
-  ) {}
+  constructor(private readonly pageApplicationService: PageApplicationService) {}
 
   @Post()
   @ApiOperation({ summary: '创建页面' })
@@ -46,17 +44,17 @@ export class PagesController {
     const result = await this.pageApplicationService.createPage({
       projectId,
       userId: req.user.id,
-      ...createPageDto
-    });
+      ...createPageDto,
+    })
 
     if (!result.success) {
-      throw new HttpException(result.error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(result.error, HttpStatus.BAD_REQUEST)
     }
 
     return {
       message: '页面创建成功',
-      data: result.data
-    };
+      data: result.data,
+    }
   }
 
   @Get()
@@ -73,23 +71,23 @@ export class PagesController {
       page: Number(query.page) || 1,
       limit: Number(query.limit) || 10,
       search: query.search,
-      includeUnpublished: query.includeUnpublished
-    });
+      includeUnpublished: query.includeUnpublished,
+    })
 
     if (!result.success) {
-      throw new HttpException(result.error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(result.error, HttpStatus.BAD_REQUEST)
     }
 
     // 转换为公开信息
     const transformedData = {
       ...result.data,
-      pages: result.data.pages.map(page => PageMapper.toPublicInfo(page))
-    };
+      pages: result.data.pages.map(page => PageMapper.toPublicInfo(page)),
+    }
 
     return {
       message: '获取页面列表成功',
-      data: transformedData
-    };
+      data: transformedData,
+    }
   }
 
   @Get(':pageId')
@@ -103,12 +101,14 @@ export class PagesController {
   ) {
     const result = await this.pageApplicationService.getPage({
       pageId,
-      userId: req.user.id
-    });
+      userId: req.user.id,
+    })
 
     if (!result.success) {
-      const status = result.error?.includes('不存在') ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
-      throw new HttpException(result.error, status);
+      const status = result.error?.includes('不存在')
+        ? HttpStatus.NOT_FOUND
+        : HttpStatus.BAD_REQUEST
+      throw new HttpException(result.error, status)
     }
 
     return {
@@ -116,9 +116,9 @@ export class PagesController {
       data: {
         ...PageMapper.toPublicInfo(result.data),
         layout: result.data.layout.toJSON(),
-        components: result.data.components.map(component => component.getRenderConfig())
-      }
-    };
+        components: result.data.components.map(component => component.getRenderConfig()),
+      },
+    }
   }
 
   @Get(':pageId/preview')
@@ -131,18 +131,20 @@ export class PagesController {
   ) {
     const result = await this.pageApplicationService.previewPage({
       pageId,
-      userId: req.user.id
-    });
+      userId: req.user.id,
+    })
 
     if (!result.success) {
-      const status = result.error?.includes('不存在') ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
-      throw new HttpException(result.error, status);
+      const status = result.error?.includes('不存在')
+        ? HttpStatus.NOT_FOUND
+        : HttpStatus.BAD_REQUEST
+      throw new HttpException(result.error, status)
     }
 
     return {
       message: '获取页面预览成功',
-      data: result.data.renderData
-    };
+      data: result.data.renderData,
+    }
   }
 
   @Put(':pageId')
@@ -158,17 +160,19 @@ export class PagesController {
     const result = await this.pageApplicationService.updatePage({
       pageId,
       userId: req.user.id,
-      ...updatePageDto
-    });
+      ...updatePageDto,
+    })
 
     if (!result.success) {
-      const status = result.error?.includes('不存在') ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
-      throw new HttpException(result.error, status);
+      const status = result.error?.includes('不存在')
+        ? HttpStatus.NOT_FOUND
+        : HttpStatus.BAD_REQUEST
+      throw new HttpException(result.error, status)
     }
 
     return {
-      message: '页面更新成功'
-    };
+      message: '页面更新成功',
+    }
   }
 
   @Post(':pageId/publish')
@@ -181,17 +185,19 @@ export class PagesController {
   ) {
     const result = await this.pageApplicationService.publishPage({
       pageId,
-      userId: req.user.id
-    });
+      userId: req.user.id,
+    })
 
     if (!result.success) {
-      const status = result.error?.includes('不存在') ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
-      throw new HttpException(result.error, status);
+      const status = result.error?.includes('不存在')
+        ? HttpStatus.NOT_FOUND
+        : HttpStatus.BAD_REQUEST
+      throw new HttpException(result.error, status)
     }
 
     return {
-      message: '页面发布成功'
-    };
+      message: '页面发布成功',
+    }
   }
 
   @Post(':pageId/unpublish')
@@ -204,32 +210,34 @@ export class PagesController {
   ) {
     const result = await this.pageApplicationService.unpublishPage({
       pageId,
-      userId: req.user.id
-    });
+      userId: req.user.id,
+    })
 
     if (!result.success) {
-      const status = result.error?.includes('不存在') ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
-      throw new HttpException(result.error, status);
+      const status = result.error?.includes('不存在')
+        ? HttpStatus.NOT_FOUND
+        : HttpStatus.BAD_REQUEST
+      throw new HttpException(result.error, status)
     }
 
     return {
-      message: '页面取消发布成功'
-    };
+      message: '页面取消发布成功',
+    }
   }
 
   @Delete(':pageId')
   @ApiOperation({ summary: '删除页面' })
   @ApiResponse({ status: 200, description: '删除成功' })
   async deletePage(
-    @Param('projectId') projectId: string,
-    @Param('pageId') pageId: string,
-    @Request() req
+    @Param('projectId') _projectId: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+    @Param('pageId') _pageId: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+    @Request() _req // eslint-disable-line @typescript-eslint/no-unused-vars
   ) {
     // 注意：这里需要实现删除页面的应用服务方法
     // 当前示例中暂时返回成功
     return {
-      message: '页面删除成功'
-    };
+      message: '页面删除成功',
+    }
   }
 
   // 组件管理接口
@@ -245,17 +253,17 @@ export class PagesController {
     const result = await this.pageApplicationService.addComponent({
       pageId,
       userId: req.user.id,
-      ...addComponentDto
-    });
+      ...addComponentDto,
+    })
 
     if (!result.success) {
-      throw new HttpException(result.error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(result.error, HttpStatus.BAD_REQUEST)
     }
 
     return {
       message: '组件添加成功',
-      data: result.data
-    };
+      data: result.data,
+    }
   }
 
   @Put(':pageId/components/:componentId')
@@ -272,16 +280,16 @@ export class PagesController {
       pageId,
       componentId,
       userId: req.user.id,
-      ...updateComponentDto
-    });
+      ...updateComponentDto,
+    })
 
     if (!result.success) {
-      throw new HttpException(result.error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(result.error, HttpStatus.BAD_REQUEST)
     }
 
     return {
-      message: '组件更新成功'
-    };
+      message: '组件更新成功',
+    }
   }
 
   @Delete(':pageId/components/:componentId')
@@ -296,16 +304,16 @@ export class PagesController {
     const result = await this.pageApplicationService.removeComponent({
       pageId,
       componentId,
-      userId: req.user.id
-    });
+      userId: req.user.id,
+    })
 
     if (!result.success) {
-      throw new HttpException(result.error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(result.error, HttpStatus.BAD_REQUEST)
     }
 
     return {
-      message: '组件删除成功'
-    };
+      message: '组件删除成功',
+    }
   }
 
   @Put(':pageId/components/reorder')
@@ -320,15 +328,15 @@ export class PagesController {
     const result = await this.pageApplicationService.reorderComponents({
       pageId,
       userId: req.user.id,
-      ...reorderDto
-    });
+      ...reorderDto,
+    })
 
     if (!result.success) {
-      throw new HttpException(result.error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(result.error, HttpStatus.BAD_REQUEST)
     }
 
     return {
-      message: '组件排序成功'
-    };
+      message: '组件排序成功',
+    }
   }
 }

@@ -1,5 +1,5 @@
-import { DomainEvent } from './domain-event';
-import { ProjectStatus } from '../entities/project.entity';
+import { DomainEvent } from './domain-event'
+import { ProjectStatus } from '../entities/project.entity'
 
 /**
  * 项目创建事件
@@ -10,14 +10,14 @@ export class ProjectCreatedEvent extends DomainEvent {
     public readonly userId: string,
     public readonly projectName?: string
   ) {
-    super(projectId, 'ProjectCreated');
+    super(projectId, 'ProjectCreated')
   }
 
   getEventData(): Record<string, any> {
     return {
       userId: this.userId,
-      projectName: this.projectName
-    };
+      projectName: this.projectName,
+    }
   }
 }
 
@@ -30,14 +30,14 @@ export class ProjectNameChangedEvent extends DomainEvent {
     public readonly oldName: string,
     public readonly newName: string
   ) {
-    super(projectId, 'ProjectNameChanged');
+    super(projectId, 'ProjectNameChanged')
   }
 
   getEventData(): Record<string, any> {
     return {
       oldName: this.oldName,
-      newName: this.newName
-    };
+      newName: this.newName,
+    }
   }
 }
 
@@ -49,13 +49,13 @@ export class ProjectPublishedEvent extends DomainEvent {
     projectId: string,
     public readonly userId: string
   ) {
-    super(projectId, 'ProjectPublished');
+    super(projectId, 'ProjectPublished')
   }
 
   getEventData(): Record<string, any> {
     return {
-      userId: this.userId
-    };
+      userId: this.userId,
+    }
   }
 }
 
@@ -69,15 +69,15 @@ export class ProjectStatusChangedEvent extends DomainEvent {
     public readonly newStatus: ProjectStatus,
     public readonly userId: string
   ) {
-    super(projectId, 'ProjectStatusChanged');
+    super(projectId, 'ProjectStatusChanged')
   }
 
   getEventData(): Record<string, any> {
     return {
       oldStatus: this.oldStatus,
       newStatus: this.newStatus,
-      userId: this.userId
-    };
+      userId: this.userId,
+    }
   }
 }
 
@@ -89,13 +89,13 @@ export class PageAddedToProjectEvent extends DomainEvent {
     projectId: string,
     public readonly pageId: string
   ) {
-    super(projectId, 'PageAddedToProject');
+    super(projectId, 'PageAddedToProject')
   }
 
   getEventData(): Record<string, any> {
     return {
-      pageId: this.pageId
-    };
+      pageId: this.pageId,
+    }
   }
 }
 
@@ -107,13 +107,13 @@ export class PageRemovedFromProjectEvent extends DomainEvent {
     projectId: string,
     public readonly pageId: string
   ) {
-    super(projectId, 'PageRemovedFromProject');
+    super(projectId, 'PageRemovedFromProject')
   }
 
   getEventData(): Record<string, any> {
     return {
-      pageId: this.pageId
-    };
+      pageId: this.pageId,
+    }
   }
 }
 
@@ -126,14 +126,14 @@ export class ProjectConfigUpdatedEvent extends DomainEvent {
     public readonly configType: 'theme' | 'navigation' | 'all',
     public readonly userId: string
   ) {
-    super(projectId, 'ProjectConfigUpdated');
+    super(projectId, 'ProjectConfigUpdated')
   }
 
   getEventData(): Record<string, any> {
     return {
       configType: this.configType,
-      userId: this.userId
-    };
+      userId: this.userId,
+    }
   }
 }
 
@@ -146,13 +146,13 @@ export class ProjectDeletedEvent extends DomainEvent {
     public readonly userId: string,
     public readonly projectName: string
   ) {
-    super(projectId, 'ProjectDeleted');
+    super(projectId, 'ProjectDeleted')
   }
 
   getEventData(): Record<string, any> {
     return {
       userId: this.userId,
-      projectName: this.projectName
-    };
+      projectName: this.projectName,
+    }
   }
 }

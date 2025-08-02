@@ -20,11 +20,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('用户不存在')
     }
 
-    return { 
-      id: user.id, 
-      email: user.email, 
+    return {
+      id: user.id,
+      email: user.email,
       username: user.username,
-      avatar: user.avatar 
+      avatar: user.avatar,
     }
   }
 }

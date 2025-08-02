@@ -1,54 +1,50 @@
-import { Injectable } from '@nestjs/common';
-import { PageRepository } from '../../domain/repositories/page.repository';
-import { ProjectRepository } from '../../domain/repositories/project.repository';
-import { DomainEventDispatcher } from '../../domain/events/domain-event';
-import { Page } from '../../domain/entities/page.entity';
-import { Component } from '../../domain/entities/component.entity';
-import { DomainError, NotFoundError, UnauthorizedError } from '../../domain/errors/domain-error';
+import { Injectable, Inject } from '@nestjs/common'
+import { PageRepository } from '../../domain/repositories/page.repository'
+import { ProjectRepository } from '../../domain/repositories/project.repository'
+import { DomainEventDispatcher } from '../../domain/events/domain-event'
+import {
+  PAGE_REPOSITORY,
+  PROJECT_REPOSITORY,
+  DOMAIN_EVENT_DISPATCHER,
+} from '../../common/constants/injection-tokens'
+import { Page } from '../../domain/entities/page.entity'
+import { DomainError } from '../../domain/errors/domain-error'
 import {
   CreatePageCommand,
   UpdatePageCommand,
   PublishPageCommand,
   UnpublishPageCommand,
-  DeletePageCommand,
   AddComponentCommand,
   UpdateComponentCommand,
   RemoveComponentCommand,
   ReorderComponentsCommand,
-  CopyPageCommand
-} from '../commands/page.commands';
-import {
-  GetPageQuery,
-  GetProjectPagesQuery,
-  GetPageStatsQuery,
-  GetRecentPagesQuery,
-  PreviewPageQuery
-} from '../queries/page.queries';
+} from '../commands/page.commands'
+import { GetPageQuery, GetProjectPagesQuery, PreviewPageQuery } from '../queries/page.queries'
 
 /**
  * 应用服务结果类型
  */
 export interface ApplicationResult<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  errors?: string[];
+  success: boolean
+  data?: T
+  error?: string
+  errors?: string[]
 }
 
 @Injectable()
 export class PageApplicationService {
   constructor(
-    private readonly pageRepository: PageRepository,
-    private readonly projectRepository: ProjectRepository,
-    private readonly eventDispatcher: DomainEventDispatcher
+    @Inject(PAGE_REPOSITORY) private readonly pageRepository: PageRepository,
+    @Inject(PROJECT_REPOSITORY) private readonly projectRepository: ProjectRepository,
+    @Inject(DOMAIN_EVENT_DISPATCHER) private readonly eventDispatcher: DomainEventDispatcher
   ) {}
 
   /**
    * 验证用户对项目的权限
    */
   private async validateProjectAccess(projectId: string, userId: string): Promise<boolean> {
-    const project = await this.projectRepository.findById(projectId);
-    return project?.userId === userId;
+    const project = await this.projectRepository.findById(projectId)
+    return project?.userId === userId
   }
 
   /**
@@ -57,27 +53,27 @@ export class PageApplicationService {
   async createPage(command: CreatePageCommand): Promise<ApplicationResult<{ pageId: string }>> {
     try {
       // 验证项目权限
-      const hasAccess = await this.validateProjectAccess(command.projectId, command.userId);
+      const hasAccess = await this.validateProjectAccess(command.projectId, command.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限访问此项目' };
+        return { success: false, error: '无权限访问此项目' }
       }
 
       // 检查路径是否唯一
       const isPathUnique = await this.pageRepository.isPathUniqueInProject(
         command.projectId,
         command.path
-      );
+      )
       if (!isPathUnique) {
-        return { success: false, error: '页面路径已存在' };
+        return { success: false, error: '页面路径已存在' }
       }
 
       // 检查名称是否唯一
       const isNameUnique = await this.pageRepository.isNameUniqueInProject(
         command.projectId,
         command.name
-      );
+      )
       if (!isNameUnique) {
-        return { success: false, error: '页面名称已存在' };
+        return { success: false, error: '页面名称已存在' }
       }
 
       // 创建页面
@@ -85,30 +81,30 @@ export class PageApplicationService {
         projectId: command.projectId,
         name: command.name,
         path: command.path,
-        title: command.title
-      });
+        title: command.title,
+      })
 
       // 设置布局
       if (command.layout) {
-        page.updateLayout(command.layout);
+        page.updateLayout(command.layout)
       }
 
       // 保存页面
-      await this.pageRepository.save(page);
+      await this.pageRepository.save(page)
 
       // 分发领域事件
-      await this.eventDispatcher.dispatchEvents(page.domainEvents);
-      page.clearDomainEvents();
+      await this.eventDispatcher.dispatchEvents(page.domainEvents)
+      page.clearDomainEvents()
 
       return {
         success: true,
-        data: { pageId: page.id }
-      };
+        data: { pageId: page.id },
+      }
     } catch (error) {
       if (error instanceof DomainError) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
-      throw error;
+      throw error
     }
   }
 
@@ -117,15 +113,15 @@ export class PageApplicationService {
    */
   async updatePage(command: UpdatePageCommand): Promise<ApplicationResult> {
     try {
-      const page = await this.pageRepository.findById(command.pageId);
+      const page = await this.pageRepository.findById(command.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限操作此页面' };
+        return { success: false, error: '无权限操作此页面' }
       }
 
       // 更新页面信息
@@ -134,11 +130,11 @@ export class PageApplicationService {
           page.projectId,
           command.name,
           command.pageId
-        );
+        )
         if (!isNameUnique) {
-          return { success: false, error: '页面名称已存在' };
+          return { success: false, error: '页面名称已存在' }
         }
-        page.updateName(command.name);
+        page.updateName(command.name)
       }
 
       if (command.path && command.path !== page.path) {
@@ -146,34 +142,34 @@ export class PageApplicationService {
           page.projectId,
           command.path,
           command.pageId
-        );
+        )
         if (!isPathUnique) {
-          return { success: false, error: '页面路径已存在' };
+          return { success: false, error: '页面路径已存在' }
         }
-        page.updatePath(command.path);
+        page.updatePath(command.path)
       }
 
       if (command.title !== undefined) {
-        page.updateTitle(command.title);
+        page.updateTitle(command.title)
       }
 
       if (command.layout) {
-        page.updateLayout(command.layout);
+        page.updateLayout(command.layout)
       }
 
       // 保存更新
-      await this.pageRepository.save(page);
+      await this.pageRepository.save(page)
 
       // 分发领域事件
-      await this.eventDispatcher.dispatchEvents(page.domainEvents);
-      page.clearDomainEvents();
+      await this.eventDispatcher.dispatchEvents(page.domainEvents)
+      page.clearDomainEvents()
 
-      return { success: true };
+      return { success: true }
     } catch (error) {
       if (error instanceof DomainError) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
-      throw error;
+      throw error
     }
   }
 
@@ -182,33 +178,33 @@ export class PageApplicationService {
    */
   async publishPage(command: PublishPageCommand): Promise<ApplicationResult> {
     try {
-      const page = await this.pageRepository.findById(command.pageId);
+      const page = await this.pageRepository.findById(command.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限操作此页面' };
+        return { success: false, error: '无权限操作此页面' }
       }
 
       // 发布页面
-      page.publish();
+      page.publish()
 
       // 保存更新
-      await this.pageRepository.save(page);
+      await this.pageRepository.save(page)
 
       // 分发领域事件
-      await this.eventDispatcher.dispatchEvents(page.domainEvents);
-      page.clearDomainEvents();
+      await this.eventDispatcher.dispatchEvents(page.domainEvents)
+      page.clearDomainEvents()
 
-      return { success: true };
+      return { success: true }
     } catch (error) {
       if (error instanceof DomainError) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
-      throw error;
+      throw error
     }
   }
 
@@ -217,75 +213,73 @@ export class PageApplicationService {
    */
   async unpublishPage(command: UnpublishPageCommand): Promise<ApplicationResult> {
     try {
-      const page = await this.pageRepository.findById(command.pageId);
+      const page = await this.pageRepository.findById(command.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限操作此页面' };
+        return { success: false, error: '无权限操作此页面' }
       }
 
       // 取消发布
-      page.unpublish();
+      page.unpublish()
 
       // 保存更新
-      await this.pageRepository.save(page);
+      await this.pageRepository.save(page)
 
       // 分发领域事件
-      await this.eventDispatcher.dispatchEvents(page.domainEvents);
-      page.clearDomainEvents();
+      await this.eventDispatcher.dispatchEvents(page.domainEvents)
+      page.clearDomainEvents()
 
-      return { success: true };
+      return { success: true }
     } catch (error) {
       if (error instanceof DomainError) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
-      throw error;
+      throw error
     }
   }
 
   /**
    * 添加组件
    */
-  async addComponent(command: AddComponentCommand): Promise<ApplicationResult<{ componentId: string }>> {
+  async addComponent(
+    command: AddComponentCommand
+  ): Promise<ApplicationResult<{ componentId: string }>> {
     try {
-      const page = await this.pageRepository.findById(command.pageId);
+      const page = await this.pageRepository.findById(command.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限操作此页面' };
+        return { success: false, error: '无权限操作此页面' }
       }
 
       // 添加组件
-      const component = page.addComponent(
-        command.componentType,
-        command.props,
-        command.position
-      );
+      const component = page.addComponent(command.componentType, command.props, command.position)
 
       // 保存更新
-      await this.pageRepository.save(page);
+      await this.pageRepository.save(page)
 
       // 分发领域事件
-      await this.eventDispatcher.dispatchEvents(page.domainEvents);
-      page.clearDomainEvents();
+      await this.eventDispatcher.dispatchEvents(page.domainEvents)
+      page.clearDomainEvents()
 
       return {
         success: true,
-        data: { componentId: component.id }
-      };
+        data: { componentId: component.id },
+      }
     } catch (error) {
       if (error instanceof DomainError) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
-      throw error;
+      throw error
     }
   }
 
@@ -294,33 +288,33 @@ export class PageApplicationService {
    */
   async updateComponent(command: UpdateComponentCommand): Promise<ApplicationResult> {
     try {
-      const page = await this.pageRepository.findById(command.pageId);
+      const page = await this.pageRepository.findById(command.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限操作此页面' };
+        return { success: false, error: '无权限操作此页面' }
       }
 
       // 更新组件
-      page.updateComponent(command.componentId, command.props);
+      page.updateComponent(command.componentId, command.props)
 
       // 保存更新
-      await this.pageRepository.save(page);
+      await this.pageRepository.save(page)
 
       // 分发领域事件
-      await this.eventDispatcher.dispatchEvents(page.domainEvents);
-      page.clearDomainEvents();
+      await this.eventDispatcher.dispatchEvents(page.domainEvents)
+      page.clearDomainEvents()
 
-      return { success: true };
+      return { success: true }
     } catch (error) {
       if (error instanceof DomainError) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
-      throw error;
+      throw error
     }
   }
 
@@ -329,33 +323,33 @@ export class PageApplicationService {
    */
   async removeComponent(command: RemoveComponentCommand): Promise<ApplicationResult> {
     try {
-      const page = await this.pageRepository.findById(command.pageId);
+      const page = await this.pageRepository.findById(command.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限操作此页面' };
+        return { success: false, error: '无权限操作此页面' }
       }
 
       // 删除组件
-      page.removeComponent(command.componentId);
+      page.removeComponent(command.componentId)
 
       // 保存更新
-      await this.pageRepository.save(page);
+      await this.pageRepository.save(page)
 
       // 分发领域事件
-      await this.eventDispatcher.dispatchEvents(page.domainEvents);
-      page.clearDomainEvents();
+      await this.eventDispatcher.dispatchEvents(page.domainEvents)
+      page.clearDomainEvents()
 
-      return { success: true };
+      return { success: true }
     } catch (error) {
       if (error instanceof DomainError) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
-      throw error;
+      throw error
     }
   }
 
@@ -364,33 +358,33 @@ export class PageApplicationService {
    */
   async reorderComponents(command: ReorderComponentsCommand): Promise<ApplicationResult> {
     try {
-      const page = await this.pageRepository.findById(command.pageId);
+      const page = await this.pageRepository.findById(command.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, command.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限操作此页面' };
+        return { success: false, error: '无权限操作此页面' }
       }
 
       // 重新排序
-      page.reorderComponents(command.componentIds);
+      page.reorderComponents(command.componentIds)
 
       // 保存更新
-      await this.pageRepository.save(page);
+      await this.pageRepository.save(page)
 
       // 分发领域事件
-      await this.eventDispatcher.dispatchEvents(page.domainEvents);
-      page.clearDomainEvents();
+      await this.eventDispatcher.dispatchEvents(page.domainEvents)
+      page.clearDomainEvents()
 
-      return { success: true };
+      return { success: true }
     } catch (error) {
       if (error instanceof DomainError) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.message }
       }
-      throw error;
+      throw error
     }
   }
 
@@ -399,107 +393,111 @@ export class PageApplicationService {
    */
   async getPage(query: GetPageQuery): Promise<ApplicationResult<Page>> {
     try {
-      const page = await this.pageRepository.findById(query.pageId);
+      const page = await this.pageRepository.findById(query.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, query.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, query.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限访问此页面' };
+        return { success: false, error: '无权限访问此页面' }
       }
 
       return {
         success: true,
-        data: page
-      };
+        data: page,
+      }
     } catch (error) {
-      throw error;
+      throw error
     }
   }
 
   /**
    * 查询项目页面列表
    */
-  async getProjectPages(query: GetProjectPagesQuery): Promise<ApplicationResult<{
-    pages: Page[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }>> {
+  async getProjectPages(query: GetProjectPagesQuery): Promise<
+    ApplicationResult<{
+      pages: Page[]
+      total: number
+      page: number
+      limit: number
+      totalPages: number
+    }>
+  > {
     try {
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(query.projectId, query.userId);
+      const hasAccess = await this.validateProjectAccess(query.projectId, query.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限访问此项目' };
+        return { success: false, error: '无权限访问此项目' }
       }
 
-      const page = query.page || 1;
-      const limit = query.limit || 10;
+      const page = query.page || 1
+      const limit = query.limit || 10
 
       const result = await this.pageRepository.findByProjectIdWithPagination(
         query.projectId,
         page,
         limit,
         query.search
-      );
+      )
 
       // 如果不包含未发布页面，进行过滤
       if (!query.includeUnpublished) {
-        result.pages = result.pages.filter(p => p.isPublished);
-        result.total = result.pages.length;
-        result.totalPages = Math.ceil(result.total / limit);
+        result.pages = result.pages.filter(p => p.isPublished)
+        result.total = result.pages.length
+        result.totalPages = Math.ceil(result.total / limit)
       }
 
       return {
         success: true,
-        data: result
-      };
+        data: result,
+      }
     } catch (error) {
-      throw error;
+      throw error
     }
   }
 
   /**
    * 预览页面
    */
-  async previewPage(query: PreviewPageQuery): Promise<ApplicationResult<{
-    page: Page;
-    renderData: any;
-  }>> {
+  async previewPage(query: PreviewPageQuery): Promise<
+    ApplicationResult<{
+      page: Page
+      renderData: any
+    }>
+  > {
     try {
-      const page = await this.pageRepository.findById(query.pageId);
+      const page = await this.pageRepository.findById(query.pageId)
       if (!page) {
-        return { success: false, error: '页面不存在' };
+        return { success: false, error: '页面不存在' }
       }
 
       // 验证权限
-      const hasAccess = await this.validateProjectAccess(page.projectId, query.userId);
+      const hasAccess = await this.validateProjectAccess(page.projectId, query.userId)
       if (!hasAccess) {
-        return { success: false, error: '无权限访问此页面' };
+        return { success: false, error: '无权限访问此页面' }
       }
 
       // 生成渲染数据
       const renderData = {
         meta: {
           title: page.title || page.name,
-          path: page.path
+          path: page.path,
         },
         layout: page.layout.toJSON(),
-        components: page.components.map(component => component.getRenderConfig())
-      };
+        components: page.components.map(component => component.getRenderConfig()),
+      }
 
       return {
         success: true,
         data: {
           page,
-          renderData
-        }
-      };
+          renderData,
+        },
+      }
     } catch (error) {
-      throw error;
+      throw error
     }
   }
 }

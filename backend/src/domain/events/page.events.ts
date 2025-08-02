@@ -1,5 +1,5 @@
-import { DomainEvent } from './domain-event';
-import { ComponentType } from '../types/component.types';
+import { DomainEvent } from './domain-event'
+import { ComponentType } from '../types/component.types'
 
 /**
  * 页面创建事件
@@ -11,15 +11,15 @@ export class PageCreatedEvent extends DomainEvent {
     public readonly pageName?: string,
     public readonly pagePath?: string
   ) {
-    super(pageId, 'PageCreated');
+    super(pageId, 'PageCreated')
   }
 
   getEventData(): Record<string, any> {
     return {
       projectId: this.projectId,
       pageName: this.pageName,
-      pagePath: this.pagePath
-    };
+      pagePath: this.pagePath,
+    }
   }
 }
 
@@ -31,13 +31,13 @@ export class PagePublishedEvent extends DomainEvent {
     pageId: string,
     public readonly projectId: string
   ) {
-    super(pageId, 'PagePublished');
+    super(pageId, 'PagePublished')
   }
 
   getEventData(): Record<string, any> {
     return {
-      projectId: this.projectId
-    };
+      projectId: this.projectId,
+    }
   }
 }
 
@@ -49,13 +49,13 @@ export class PageUnpublishedEvent extends DomainEvent {
     pageId: string,
     public readonly projectId: string
   ) {
-    super(pageId, 'PageUnpublished');
+    super(pageId, 'PageUnpublished')
   }
 
   getEventData(): Record<string, any> {
     return {
-      projectId: this.projectId
-    };
+      projectId: this.projectId,
+    }
   }
 }
 
@@ -69,15 +69,15 @@ export class ComponentAddedEvent extends DomainEvent {
     public readonly componentType: ComponentType,
     public readonly position?: number
   ) {
-    super(pageId, 'ComponentAdded');
+    super(pageId, 'ComponentAdded')
   }
 
   getEventData(): Record<string, any> {
     return {
       componentId: this.componentId,
       componentType: this.componentType,
-      position: this.position
-    };
+      position: this.position,
+    }
   }
 }
 
@@ -90,14 +90,14 @@ export class ComponentRemovedEvent extends DomainEvent {
     public readonly componentId: string,
     public readonly componentType: ComponentType
   ) {
-    super(pageId, 'ComponentRemoved');
+    super(pageId, 'ComponentRemoved')
   }
 
   getEventData(): Record<string, any> {
     return {
       componentId: this.componentId,
-      componentType: this.componentType
-    };
+      componentType: this.componentType,
+    }
   }
 }
 
@@ -110,14 +110,14 @@ export class ComponentUpdatedEvent extends DomainEvent {
     public readonly componentId: string,
     public readonly updatedProperties?: string[]
   ) {
-    super(pageId, 'ComponentUpdated');
+    super(pageId, 'ComponentUpdated')
   }
 
   getEventData(): Record<string, any> {
     return {
       componentId: this.componentId,
-      updatedProperties: this.updatedProperties
-    };
+      updatedProperties: this.updatedProperties,
+    }
   }
 }
 
@@ -129,13 +129,13 @@ export class ComponentsReorderedEvent extends DomainEvent {
     pageId: string,
     public readonly newOrder: string[]
   ) {
-    super(pageId, 'ComponentsReordered');
+    super(pageId, 'ComponentsReordered')
   }
 
   getEventData(): Record<string, any> {
     return {
-      newOrder: this.newOrder
-    };
+      newOrder: this.newOrder,
+    }
   }
 }
 
@@ -149,15 +149,15 @@ export class PageNameChangedEvent extends DomainEvent {
     public readonly newName: string,
     public readonly projectId: string
   ) {
-    super(pageId, 'PageNameChanged');
+    super(pageId, 'PageNameChanged')
   }
 
   getEventData(): Record<string, any> {
     return {
       oldName: this.oldName,
       newName: this.newName,
-      projectId: this.projectId
-    };
+      projectId: this.projectId,
+    }
   }
 }
 
@@ -171,15 +171,15 @@ export class PagePathChangedEvent extends DomainEvent {
     public readonly newPath: string,
     public readonly projectId: string
   ) {
-    super(pageId, 'PagePathChanged');
+    super(pageId, 'PagePathChanged')
   }
 
   getEventData(): Record<string, any> {
     return {
       oldPath: this.oldPath,
       newPath: this.newPath,
-      projectId: this.projectId
-    };
+      projectId: this.projectId,
+    }
   }
 }
 
@@ -191,13 +191,13 @@ export class PageLayoutUpdatedEvent extends DomainEvent {
     pageId: string,
     public readonly projectId: string
   ) {
-    super(pageId, 'PageLayoutUpdated');
+    super(pageId, 'PageLayoutUpdated')
   }
 
   getEventData(): Record<string, any> {
     return {
-      projectId: this.projectId
-    };
+      projectId: this.projectId,
+    }
   }
 }
 
@@ -210,13 +210,13 @@ export class PageDeletedEvent extends DomainEvent {
     public readonly projectId: string,
     public readonly pageName: string
   ) {
-    super(pageId, 'PageDeleted');
+    super(pageId, 'PageDeleted')
   }
 
   getEventData(): Record<string, any> {
     return {
       projectId: this.projectId,
-      pageName: this.pageName
-    };
+      pageName: this.pageName,
+    }
   }
 }

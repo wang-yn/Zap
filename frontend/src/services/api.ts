@@ -108,6 +108,56 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  // 页面相关API
+  async get(endpoint: string): Promise<any> {
+    return this.request(endpoint);
+  }
+
+  async post(endpoint: string, data: any): Promise<any> {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async put(endpoint: string, data: any): Promise<any> {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async delete(endpoint: string): Promise<void> {
+    return this.request(endpoint, {
+      method: 'DELETE',
+    });
+  }
+
+  // 页面专用API
+  async getPage(id: string): Promise<any> {
+    return this.request(`/pages/${id}`);
+  }
+
+  async createPage(data: any): Promise<any> {
+    return this.request('/pages', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePage(id: string, data: any): Promise<any> {
+    return this.request(`/pages/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deletePage(id: string): Promise<void> {
+    return this.request(`/pages/${id}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const apiService = new ApiService(API_BASE_URL);
