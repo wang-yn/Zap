@@ -11,7 +11,18 @@
       "Bash(tree:*)",
       "Bash(find:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm audit:*)",
+      "Bash(pnpm:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(docker-compose:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(docker exec:*)",
+      "Bash(winpty docker exec -it zap-postgres psql -U zapuser -d zapdb -c \"\\dt\")",
+      "Bash(npm run start:dev:*)"
     ],
     "deny": []
   }

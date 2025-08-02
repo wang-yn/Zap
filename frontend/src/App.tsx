@@ -1,29 +1,68 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ConfigProvider, App as AntApp } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
 import AppLayout from './components/Layout/AppLayout';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import PlaceholderPage from './pages/Placeholder/PlaceholderPage';
+import LoginPage from './pages/Auth/LoginPage';
+import RegisterPage from './pages/Auth/RegisterPage';
 import './App.css';
+
+// 简单的认证状态管理
+const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  
+  React.useEffect(() => {
+    // 检查本地存储中的token
+    const token = localStorage.getItem('auth_token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const login = (token: string) => {
+    localStorage.setItem('auth_token', token);
+    setIsAuthenticated(true);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('auth_token');
+    setIsAuthenticated(false);
+  };
+
+  return { isAuthenticated, login, logout };
+};
+
+// 受保护的路由组件
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 function App() {
   const [selectedKey, setSelectedKey] = React.useState('dashboard');
+  const { logout } = useAuth();
 
-  // 处理菜单点击
   const handleMenuClick = (key: string) => {
     setSelectedKey(key);
     console.log('导航到:', key);
   };
 
-  // 处理用户菜单点击
   const handleUserMenuClick = (key: string) => {
+    if (key === 'logout') {
+      logout();
+    }
     console.log('用户操作:', key);
   };
 
-  // 渲染主内容区域
   const renderContent = () => {
     switch (selectedKey) {
       case 'dashboard':
         return <DashboardPage />;
-      
       case 'all-projects':
       case 'recent-projects':
       case 'favorite-projects':
@@ -36,7 +75,6 @@ function App() {
             }`}
           />
         );
-      
       case 'templates':
         return (
           <PlaceholderPage 
@@ -44,7 +82,6 @@ function App() {
             feature="丰富的模板库，快速开始您的项目"
           />
         );
-      
       case 'components':
         return (
           <PlaceholderPage 
@@ -52,7 +89,6 @@ function App() {
             feature="丰富的组件库，支持拖拽使用"
           />
         );
-      
       case 'settings':
         return (
           <PlaceholderPage 
@@ -60,7 +96,6 @@ function App() {
             feature="配置您的系统偏好和账户信息"
           />
         );
-      
       default:
         return (
           <PlaceholderPage 
@@ -72,13 +107,30 @@ function App() {
   };
 
   return (
-    <AppLayout
-      selectedKey={selectedKey}
-      onMenuClick={handleMenuClick}
-      onUserMenuClick={handleUserMenuClick}
-    >
-      {renderContent()}
-    </AppLayout>
+    <ConfigProvider locale={zhCN}>
+      <AntApp>
+        <Router>
+          <Routes>
+            {/* 认证页面 */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            
+            {/* 受保护的主应用 */}
+            <Route path="/*" element={
+              <ProtectedRoute>
+                <AppLayout
+                  selectedKey={selectedKey}
+                  onMenuClick={handleMenuClick}
+                  onUserMenuClick={handleUserMenuClick}
+                >
+                  {renderContent()}
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </Router>
+      </AntApp>
+    </ConfigProvider>
   );
 }
 

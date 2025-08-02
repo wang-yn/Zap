@@ -53,7 +53,7 @@ interface AppActions {
 }
 
 // 创建store
-export const useAppStore = create<AppState & AppActions>((set, get) => ({
+export const useAppStore = create<AppState & AppActions>((set) => ({
   // 初始状态
   user: {
     isAuthenticated: false,
@@ -87,7 +87,7 @@ export const useAppStore = create<AppState & AppActions>((set, get) => ({
     },
   })),
   
-  logout: () => set((state) => ({
+  logout: () => set(() => ({
     user: {
       isAuthenticated: false,
       userInfo: null,
