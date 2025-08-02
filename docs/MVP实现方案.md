@@ -41,25 +41,72 @@ model User {
 
 #### 2.1.2 后端实现
 ```typescript
-// 需实现的模块结构
-backend/src/modules/
-├── auth/
-│   ├── auth.module.ts
-│   ├── auth.controller.ts
-│   ├── auth.service.ts
-│   ├── dto/
-│   │   ├── login.dto.ts
-│   │   └── register.dto.ts
-│   └── guards/
-│       └── jwt-auth.guard.ts
-├── users/
-│   ├── users.module.ts
-│   ├── users.controller.ts
-│   └── users.service.ts
-└── projects/
-    ├── projects.module.ts
-    ├── projects.controller.ts
-    └── projects.service.ts
+// 需实现的模块结构 - 领域驱动设计
+backend/src/
+├── modules/                    // 应用层模块
+│   ├── auth/
+│   │   ├── auth.module.ts
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── dto/
+│   │   │   ├── login.dto.ts
+│   │   │   └── register.dto.ts
+│   │   └── guards/
+│   │       └── jwt-auth.guard.ts
+│   ├── users/
+│   │   ├── users.module.ts
+│   │   ├── users.controller.ts
+│   │   └── users.service.ts
+│   └── projects/
+│       ├── projects.module.ts
+│       ├── projects.controller.ts
+│       └── projects.service.ts
+├── domain/                     // 领域层
+│   ├── entities/
+│   │   ├── project.entity.ts
+│   │   ├── page.entity.ts
+│   │   ├── component.entity.ts
+│   │   └── user.entity.ts
+│   ├── value-objects/
+│   │   ├── component-props.vo.ts
+│   │   ├── page-layout.vo.ts
+│   │   └── project-config.vo.ts
+│   ├── events/
+│   │   ├── project-created.event.ts
+│   │   ├── page-published.event.ts
+│   │   └── component-added.event.ts
+│   ├── services/
+│   │   ├── project.service.ts
+│   │   └── page.service.ts
+│   └── repositories/
+│       ├── project.repository.ts
+│       ├── page.repository.ts
+│       └── user.repository.ts
+├── infrastructure/             // 基础设施层
+│   ├── database/
+│   │   ├── repositories/
+│   │   │   ├── prisma-project.repository.ts
+│   │   │   ├── prisma-page.repository.ts
+│   │   │   └── prisma-user.repository.ts
+│   │   └── mappers/
+│   │       ├── project.mapper.ts
+│   │       ├── page.mapper.ts
+│   │       └── user.mapper.ts
+│   └── events/
+│       ├── domain-event-dispatcher.ts
+│       └── event-handlers/
+│           ├── project-created.handler.ts
+│           └── page-published.handler.ts
+└── application/                // 应用服务层
+    ├── services/
+    │   ├── project-application.service.ts
+    │   └── page-application.service.ts
+    ├── commands/
+    │   ├── create-project.command.ts
+    │   └── create-page.command.ts
+    └── queries/
+        ├── get-project.query.ts
+        └── get-pages.query.ts
 ```
 
 #### 2.1.3 前端实现
@@ -446,11 +493,16 @@ export class ReactGenerator {
 ### 3.1 第一阶段：基础架构完善（1周）
 
 #### 任务清单
-- [x] ✅ 完善后端模块结构
-  - [ ] 创建 auth 模块
-  - [ ] 创建 users 模块  
-  - [ ] 创建 projects 模块
-  - [ ] 创建 pages 模块
+- [x] ✅ 完善后端模块结构 - 领域驱动设计
+  - [ ] 创建领域实体层 (Project, Page, Component)
+  - [ ] 实现值对象 (ComponentProps, PageLayout, ProjectConfig)
+  - [ ] 定义领域事件系统
+  - [ ] 创建仓储接口
+  - [ ] 实现领域服务
+  - [ ] 创建应用服务层
+  - [ ] 实现基础设施层 (Prisma 仓储实现)
+  - [ ] 配置事件分发器
+  - [ ] 创建传统模块 (auth, users, projects)
   - [ ] 配置 JWT 认证
   - [ ] 设置 Swagger API 文档
 
@@ -461,15 +513,18 @@ export class ReactGenerator {
   - [ ] 配置 Ant Design 主题
 
 #### 交付物
-- 完整的模块化后端结构
+- 完整的领域驱动设计后端结构
 - 配置完整的前端状态管理
 - API 文档和接口规范
+- 领域事件系统基础设施
 
 ### 3.2 第二阶段：用户系统实现（1周）
 
 #### 任务清单
 - [ ] 🔄 用户认证后端实现
-  - [ ] 实现用户注册/登录 API
+  - [ ] 实现用户领域实体和值对象
+  - [ ] 创建用户仓储接口和实现
+  - [ ] 实现用户注册/登录应用服务
   - [ ] JWT token 生成和验证
   - [ ] 密码加密存储
   - [ ] 用户信息管理 API
@@ -481,9 +536,12 @@ export class ReactGenerator {
   - [ ] 路由守卫实现
 
 - [ ] 🔄 项目管理功能
+  - [ ] 项目领域服务实现
+  - [ ] 项目应用服务实现
   - [ ] 项目创建/编辑/删除 API
   - [ ] 项目列表和详情页面
   - [ ] 项目权限控制
+  - [ ] 项目相关领域事件处理
 
 #### 交付物
 - 完整的用户认证系统
@@ -513,8 +571,11 @@ export class ReactGenerator {
   - [ ] 组件注册机制
 
 - [ ] 🔄 元数据管理
-  - [ ] 页面元数据结构
-  - [ ] 组件元数据管理
+  - [ ] 页面领域实体和组件管理
+  - [ ] 组件值对象和属性验证
+  - [ ] 页面布局值对象
+  - [ ] 页面和组件相关领域事件
+  - [ ] 页面应用服务实现
   - [ ] 实时预览功能
   - [ ] 撤销/重做功能
 
@@ -527,10 +588,13 @@ export class ReactGenerator {
 
 #### 任务清单
 - [ ] 🔄 页面管理后端
+  - [ ] 页面领域服务完善
+  - [ ] 页面仓储实现优化
   - [ ] 页面 CRUD API
   - [ ] 页面元数据存储
   - [ ] 页面发布状态管理
   - [ ] 页面预览接口
+  - [ ] 页面发布相关领域事件
 
 - [ ] 🔄 页面管理前端
   - [ ] 页面列表管理
