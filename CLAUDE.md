@@ -30,6 +30,10 @@ cd backend && pnpm install
 # Start services using Docker (recommended)
 docker-compose up -d postgres redis
 
+# Initialize database schema and seed data
+cd backend && npx prisma db push    # Apply database schema
+cd backend && npm run db:seed       # Create default admin user
+
 # Start backend development server
 cd backend && npm run start:dev
 
@@ -60,6 +64,18 @@ cd backend && npm run lint
 cd backend && npm run format
 ```
 
+### Database Management
+
+```bash
+# Database schema operations
+cd backend && npx prisma db push           # Push schema changes to database
+cd backend && npx prisma migrate deploy    # Deploy migrations in production
+cd backend && npx prisma studio            # Open Prisma Studio GUI
+
+# Database seeding
+cd backend && npm run db:seed               # Create default admin user (admin@zap.com / admin123)
+```
+
 ### Testing
 
 ```bash
@@ -88,13 +104,37 @@ cd frontend && npm run test
 - `src/utils/` - Utility functions
 
 ### Backend Structure
-- `src/modules/` - Feature modules (NestJS structure)
-  - `auth/` - Authentication module with JWT strategy
-  - `users/` - User management module
-- `src/common/` - Shared utilities and decorators
-  - `prisma/` - Prisma service for database operations
-- `src/config/` - Application configuration
-- `prisma/schema.prisma` - Database schema definition
+采用领域驱动设计(DDD)架构：
+
+- `src/domain/` - 领域层 (Domain Layer)
+  - `entities/` - 领域实体 (Project, Page, Component)
+  - `value-objects/` - 值对象 (ComponentProps, PageLayout, ProjectConfig)
+  - `events/` - 领域事件 (ProjectCreated, PagePublished, ComponentAdded)
+  - `services/` - 领域服务 (ProjectService, PageService)
+  - `repositories/` - 仓储接口 (ProjectRepository, PageRepository)
+
+- `src/application/` - 应用服务层 (Application Layer)
+  - `services/` - 应用服务 (ProjectApplicationService, PageApplicationService)
+  - `commands/` - 命令对象 (CreateProjectCommand, CreatePageCommand)
+  - `queries/` - 查询对象 (GetProjectQuery, GetPagesQuery)
+
+- `src/infrastructure/` - 基础设施层 (Infrastructure Layer)
+  - `database/` - 数据库实现
+    - `repositories/` - Prisma仓储实现
+    - `mappers/` - 数据映射器
+  - `events/` - 事件基础设施
+    - `domain-event-dispatcher.ts` - 事件分发器
+    - `event-handlers/` - 事件处理器
+
+- `src/modules/` - 传统NestJS模块 (Presentation Layer)
+  - `auth/` - 认证模块 (JWT策略)
+  - `users/` - 用户管理模块
+  - `projects/` - 项目管理模块
+
+- `src/common/` - 共享工具和装饰器
+  - `prisma/` - Prisma服务
+- `src/config/` - 应用配置
+- `prisma/schema.prisma` - 数据库schema定义
 
 ### Database Schema
 Core entities with metadata-driven design:
@@ -102,12 +142,29 @@ Core entities with metadata-driven design:
 - **Project**: Container for applications (`id`, `name`, `description`, `userId`, `status`, `config` JSON)
 - **Page**: Individual pages with metadata (`id`, `projectId`, `name`, `path`, `components` JSON, `layout` JSON, `isPublished`)
 
+#### Default Admin User
+The system automatically creates a default administrator account during database seeding:
+- **Email**: `admin@zap.com`
+- **Username**: `admin`
+- **Password**: `admin123`
+- **Purpose**: Initial system access and user management
+
 ### Data Flow
-The platform uses a metadata-driven approach where:
-1. User interactions in the visual editor generate metadata
-2. Metadata is stored in PostgreSQL JSON columns (`components`, `layout`, `config`)
-3. Frontend renders components dynamically from metadata using React DnD
-4. Code generation can produce static code from metadata configurations
+The platform uses a domain-driven metadata approach where:
+1. User interactions in the visual editor trigger domain commands
+2. Domain entities (Project, Page, Component) validate business rules
+3. Domain events are published for cross-cutting concerns
+4. Metadata is stored in PostgreSQL JSON columns (`components`, `layout`, `config`)
+5. Frontend renders components dynamically from metadata using React DnD
+6. Code generation can produce static code from metadata configurations
+
+### Domain Model
+Key business concepts encapsulated in domain entities:
+- **Project Entity**: Manages project lifecycle, validation, and business rules
+- **Page Entity**: Handles page components, layout, and publishing logic
+- **Component Entity**: Encapsulates component properties and validation
+- **Value Objects**: ComponentProps, PageLayout, ProjectConfig ensure data consistency
+- **Domain Events**: Enable loose coupling and event-driven architecture
 
 ### Docker Services
 - `postgres`: PostgreSQL 15 database (port 5432, database: `zapdb`)
@@ -145,10 +202,12 @@ The platform uses a metadata-driven approach where:
 - `docker-compose.yml` - Development environment setup with PostgreSQL/Redis
 - `frontend/vite.config.ts` - Frontend build configuration with proxy
 - `backend/prisma/schema.prisma` - Database schema with User/Project/Page models
-- `database/init.sql` - Database initialization script
+- `backend/prisma/seed.ts` - Database seeding script for default admin user
+- `database/init.sql` - Database initialization script with setup instructions
 - `docs/整体架构.md` - Detailed architecture documentation (in Chinese)
 - `docs/开发指南.md` - Development guide (in Chinese)
 - `docs/MVP实现方案.md` - MVP implementation plan (in Chinese)
+- `docs/MVP元数据结构设计.md` - MVP metadata structure with domain-driven design (in Chinese)
 
 ## Recommended Practices
 
