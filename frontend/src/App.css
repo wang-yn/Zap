@@ -21,11 +21,17 @@ body {
 
 .ant-layout-sider {
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  position: fixed !important;
+  height: 100vh !important;
+  z-index: 1001;
 }
 
 .ant-layout-header {
   background: #fff !important;
   border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 /* 侧边栏样式 */
@@ -48,6 +54,21 @@ body {
 /* 内容区域样式 */
 .ant-layout-content {
   background: #f5f5f5;
+  overflow: auto;
+}
+
+/* 确保内容区域可以滚动 */
+.content-scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 响应式侧边栏调整 */
+@media (max-width: 768px) {
+  .ant-layout-sider {
+    position: fixed !important;
+    z-index: 1002;
+  }
 }
 
 /* 卡片悬停效果 */

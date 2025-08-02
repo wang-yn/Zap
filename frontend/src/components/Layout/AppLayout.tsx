@@ -105,7 +105,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh', overflow: 'hidden' }}>
       {/* 侧边栏 */}
       <Sider 
         trigger={null} 
@@ -113,6 +113,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         collapsed={collapsed}
         style={{
           background: '#001529',
+          height: '100vh',
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          zIndex: 1001,
         }}
       >
         <div className="logo" style={{ 
@@ -138,7 +144,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         />
       </Sider>
 
-      <Layout>
+      <Layout style={{ 
+        marginLeft: collapsed ? 80 : 200,
+        transition: 'margin-left 0.2s',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         {/* 顶部导航栏 */}
         <Header style={{ 
           padding: '0 24px', 
@@ -147,7 +159,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           alignItems: 'center', 
           justifyContent: 'space-between',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          zIndex: 1000
+          zIndex: 1000,
+          height: 64,
+          flexShrink: 0
         }}>
           {/* 左侧：折叠按钮和面包屑 */}
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -214,13 +228,19 @@ const AppLayout: React.FC<AppLayoutProps> = ({
 
         {/* 主内容区域 */}
         <Content style={{ 
-          margin: '24px', 
-          padding: '24px', 
-          background: '#fff', 
-          borderRadius: 8,
-          minHeight: 280 
+          flex: 1,
+          overflow: 'auto',
+          background: '#f5f5f5',
+          padding: '24px',
         }}>
-          {children}
+          <div style={{ 
+            background: '#fff', 
+            borderRadius: 8,
+            padding: '24px',
+            minHeight: '100%'
+          }}>
+            {children}
+          </div>
         </Content>
       </Layout>
     </Layout>
