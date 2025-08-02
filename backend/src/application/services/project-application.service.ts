@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ProjectRepository } from '../../domain/repositories/project.repository';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { DomainEventDispatcher } from '../../domain/events/domain-event';
 import { Project, ProjectStatus } from '../../domain/entities/project.entity';
 import { DomainError, NotFoundError, UnauthorizedError } from '../../domain/errors/domain-error';
+import {
+  USER_REPOSITORY,
+  PROJECT_REPOSITORY,
+  DOMAIN_EVENT_DISPATCHER
+} from '../../common/constants/injection-tokens';
 import {
   CreateProjectCommand,
   UpdateProjectCommand,
@@ -33,9 +38,9 @@ export interface ApplicationResult<T = any> {
 @Injectable()
 export class ProjectApplicationService {
   constructor(
-    private readonly projectRepository: ProjectRepository,
-    private readonly userRepository: UserRepository,
-    private readonly eventDispatcher: DomainEventDispatcher
+    @Inject(PROJECT_REPOSITORY) private readonly projectRepository: ProjectRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(DOMAIN_EVENT_DISPATCHER) private readonly eventDispatcher: DomainEventDispatcher
   ) {}
 
   /**

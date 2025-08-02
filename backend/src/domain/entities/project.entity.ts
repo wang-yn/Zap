@@ -10,12 +10,9 @@ import {
 } from '../events/project.events';
 import { DomainError } from '../errors/domain-error';
 import { generateId } from '../../common/utils/id-generator';
+import { ProjectStatus as PrismaProjectStatus } from '@prisma/client';
 
-export enum ProjectStatus {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived'
-}
+export { PrismaProjectStatus as ProjectStatus };
 
 export class Project {
   private _domainEvents: DomainEvent[] = [];
@@ -25,7 +22,7 @@ export class Project {
     private _name: string,
     private _description: string | null,
     private readonly _userId: string,
-    private _status: ProjectStatus,
+    private _status: PrismaProjectStatus,
     private _config: ProjectConfig,
     private readonly _createdAt: Date,
     private _updatedAt: Date,
@@ -44,7 +41,7 @@ export class Project {
       data.name,
       data.description || null,
       data.userId,
-      ProjectStatus.DRAFT,
+      PrismaProjectStatus.DRAFT,
       data.config || ProjectConfig.default(),
       new Date(),
       new Date()
@@ -61,7 +58,7 @@ export class Project {
     name: string;
     description: string | null;
     userId: string;
-    status: string;
+    status: PrismaProjectStatus;
     config: any;
     createdAt: Date;
     updatedAt: Date;
@@ -72,7 +69,7 @@ export class Project {
       data.name,
       data.description,
       data.userId,
-      data.status as ProjectStatus,
+      data.status,
       ProjectConfig.fromJSON(data.config),
       data.createdAt,
       data.updatedAt,
@@ -127,14 +124,14 @@ export class Project {
 
   publish(): void {
     this.validateCanPublish();
-    this._status = ProjectStatus.PUBLISHED;
+    this._status = PrismaProjectStatus.PUBLISHED;
     this._updatedAt = new Date();
     
     this.addDomainEvent(new ProjectPublishedEvent(this.id, this._userId));
   }
 
   archive(): void {
-    this._status = ProjectStatus.ARCHIVED;
+    this._status = PrismaProjectStatus.ARCHIVED;
     this._updatedAt = new Date();
   }
 
@@ -169,7 +166,7 @@ export class Project {
   get name(): string { return this._name; }
   get description(): string | null { return this._description; }
   get userId(): string { return this._userId; }
-  get status(): ProjectStatus { return this._status; }
+  get status(): PrismaProjectStatus { return this._status; }
   get config(): ProjectConfig { return this._config; }
   get pages(): readonly Page[] { return this._pages; }
   get createdAt(): Date { return this._createdAt; }
