@@ -7,34 +7,12 @@ import DashboardPage from './pages/Dashboard/DashboardPage';
 import PlaceholderPage from './pages/Placeholder/PlaceholderPage';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
+import { useUser, useAppStore } from './store';
 import './App.css';
-
-// 简单的认证状态管理
-const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  
-  React.useEffect(() => {
-    // 检查本地存储中的token
-    const token = localStorage.getItem('auth_token');
-    setIsAuthenticated(!!token);
-  }, []);
-
-  const login = (token: string) => {
-    localStorage.setItem('auth_token', token);
-    setIsAuthenticated(true);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('auth_token');
-    setIsAuthenticated(false);
-  };
-
-  return { isAuthenticated, login, logout };
-};
 
 // 受保护的路由组件
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useUser();
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -43,9 +21,25 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// 认证路由组件（已登录用户不能访问登录/注册页）
+const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useUser();
+  
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 function App() {
   const [selectedKey, setSelectedKey] = React.useState('dashboard');
-  const { logout } = useAuth();
+  const { logout, initializeAuth } = useAppStore();
+  
+  // 初始化认证状态
+  React.useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   const handleMenuClick = (key: string) => {
     setSelectedKey(key);
@@ -112,11 +106,11 @@ function App() {
         <Router>
           <Routes>
             {/* 认证页面 */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<AuthRoute><LoginPage /></AuthRoute>} />
+            <Route path="/register" element={<AuthRoute><RegisterPage /></AuthRoute>} />
             
             {/* 受保护的主应用 */}
-            <Route path="/*" element={
+            <Route path="/dashboard" element={
               <ProtectedRoute>
                 <AppLayout
                   selectedKey={selectedKey}
@@ -127,6 +121,25 @@ function App() {
                 </AppLayout>
               </ProtectedRoute>
             } />
+            
+            {/* 其他受保护的路由 */}
+            <Route path="/projects/*" element={
+              <ProtectedRoute>
+                <AppLayout
+                  selectedKey={selectedKey}
+                  onMenuClick={handleMenuClick}
+                  onUserMenuClick={handleUserMenuClick}
+                >
+                  {renderContent()}
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            
+            {/* 默认路由重定向 */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            
+            {/* 其他所有路由都重定向到dashboard */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
       </AntApp>

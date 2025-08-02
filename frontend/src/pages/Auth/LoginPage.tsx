@@ -2,6 +2,7 @@ import React from 'react';
 import { Form, Input, Button, Card, Typography, Divider, message } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useAppStore } from '../../store';
 import apiService from '../../services/api';
 
 const { Title, Text } = Typography;
@@ -15,20 +16,21 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
+  const { login } = useAppStore();
 
   const onFinish = async (values: LoginFormData) => {
     setLoading(true);
     try {
       const response = await apiService.login(values);
       
-      // 保存token到本地存储
-      localStorage.setItem('auth_token', response.access_token);
-      localStorage.setItem('user_info', JSON.stringify(response.user));
+      // 使用store更新认证状态
+      login(response.access_token, response.user);
       
       message.success('登录成功！');
       navigate('/dashboard');
-    } catch (error: any) {
-      message.error(error.message || '登录失败，请检查邮箱和密码');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '登录失败，请检查邮箱和密码';
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }

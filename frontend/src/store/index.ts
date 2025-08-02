@@ -34,7 +34,9 @@ interface AppState {
 interface AppActions {
   // 用户相关动作
   setUserInfo: (userInfo: any) => void;
+  login: (token: string, userInfo: any) => void;
   logout: () => void;
+  initializeAuth: () => void;
   
   // 项目相关动作
   setProjects: (projects: any[]) => void;
@@ -87,12 +89,46 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
     },
   })),
   
-  logout: () => set(() => ({
-    user: {
-      isAuthenticated: false,
-      userInfo: null,
-    },
-  })),
+  login: (token, userInfo) => set(() => {
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('user_info', JSON.stringify(userInfo));
+    return {
+      user: {
+        isAuthenticated: true,
+        userInfo,
+      },
+    };
+  }),
+  
+  logout: () => set(() => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_info');
+    return {
+      user: {
+        isAuthenticated: false,
+        userInfo: null,
+      },
+    };
+  }),
+  
+  initializeAuth: () => set(() => {
+    const token = localStorage.getItem('auth_token');
+    const userInfoStr = localStorage.getItem('user_info');
+    let userInfo = null;
+    
+    try {
+      userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
+    } catch (error) {
+      console.error('Error parsing user info from localStorage:', error);
+    }
+    
+    return {
+      user: {
+        isAuthenticated: !!(token && userInfo),
+        userInfo,
+      },
+    };
+  }),
   
   // 项目相关动作
   setProjects: (projects) => set((state) => ({
