@@ -1,10 +1,25 @@
 import React from 'react';
 import { Button, Typography, Card, Row, Col, Divider } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph } = Typography;
 
 const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleCreateProject = () => {
+    navigate('/projects');
+  };
+
+  const handleViewTemplates = () => {
+    navigate('/templates');
+  };
+
+  const handleStartEditing = () => {
+    navigate('/projects');
+  };
+
   return (
     <>
       {/* 欢迎区域 */}
@@ -35,6 +50,7 @@ const DashboardPage: React.FC = () => {
               background: 'rgba(255,255,255,0.2)',
               border: '2px solid rgba(255,255,255,0.3)'
             }}
+            onClick={handleCreateProject}
           >
             开始创建项目
           </Button>
@@ -61,7 +77,7 @@ const DashboardPage: React.FC = () => {
           <p style={{ color: '#666', marginBottom: 16 }}>
             使用预设模板快速创建应用，无需从零开始
           </p>
-          <Button type="link" style={{ padding: 0 }}>
+          <Button type="link" style={{ padding: 0 }} onClick={handleViewTemplates}>
             查看模板 →
           </Button>
         </div>
@@ -79,7 +95,7 @@ const DashboardPage: React.FC = () => {
           <p style={{ color: '#666', marginBottom: 16 }}>
             拖拽式组件编辑，所见即所得的开发体验
           </p>
-          <Button type="link" style={{ padding: 0 }}>
+          <Button type="link" style={{ padding: 0 }} onClick={handleStartEditing}>
             开始编辑 →
           </Button>
         </div>
@@ -146,8 +162,8 @@ const DashboardPage: React.FC = () => {
               最后编辑：2小时前
             </p>
             <div style={{ display: 'flex', gap: 8 }}>
-              <Button size="small">编辑</Button>
-              <Button size="small" type="text">预览</Button>
+              <Button size="small" onClick={() => navigate('/projects/demo1/editor')}>编辑</Button>
+              <Button size="small" type="text" onClick={() => window.open('/preview/demo1/page1', '_blank')}>预览</Button>
             </div>
           </div>
 
@@ -183,8 +199,8 @@ const DashboardPage: React.FC = () => {
               最后编辑：1天前
             </p>
             <div style={{ display: 'flex', gap: 8 }}>
-              <Button size="small">编辑</Button>
-              <Button size="small" type="text">预览</Button>
+              <Button size="small" onClick={() => navigate('/projects/demo2/editor')}>编辑</Button>
+              <Button size="small" type="text" onClick={() => window.open('/preview/demo2/page1', '_blank')}>预览</Button>
             </div>
           </div>
 
@@ -200,7 +216,9 @@ const DashboardPage: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             color: '#999'
-          }}>
+          }}
+          onClick={handleCreateProject}
+          >
             <PlusOutlined style={{ fontSize: 32, marginBottom: 12 }} />
             <span>创建新项目</span>
           </div>

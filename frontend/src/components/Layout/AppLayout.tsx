@@ -1,5 +1,6 @@
 import React from 'react';
 import { Layout, Menu, Button, Avatar, Dropdown, Space, Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import {
   HomeOutlined,
   AppstoreOutlined,
@@ -29,6 +30,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   onUserMenuClick,
 }) => {
   const [collapsed, setCollapsed] = React.useState(false);
+  const navigate = useNavigate();
 
   // 侧边栏菜单项
   const sidebarMenuItems = [
@@ -96,7 +98,39 @@ const AppLayout: React.FC<AppLayoutProps> = ({
 
   // 处理菜单点击
   const handleMenuClick = ({ key }: { key: string }) => {
+    // 使用 React Router 进行导航
+    switch (key) {
+      case 'dashboard':
+        navigate('/dashboard');
+        break;
+      case 'all-projects':
+        navigate('/projects');
+        break;
+      case 'recent-projects':
+        navigate('/projects');
+        break;
+      case 'favorite-projects':
+        navigate('/projects');
+        break;
+      case 'templates':
+        navigate('/templates');
+        break;
+      case 'components':
+        navigate('/components');
+        break;
+      case 'settings':
+        navigate('/settings');
+        break;
+      default:
+        break;
+    }
     onMenuClick?.(key);
+  };
+
+  // 处理创建项目按钮点击
+  const handleCreateProject = () => {
+    // TODO: 创建项目的逻辑，暂时跳转到项目列表
+    navigate('/projects');
   };
 
   // 处理用户菜单点击
@@ -201,6 +235,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
               type="primary" 
               icon={<PlusOutlined />}
               style={{ borderRadius: 6 }}
+              onClick={handleCreateProject}
             >
               创建项目
             </Button>
